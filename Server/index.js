@@ -2,22 +2,12 @@ const http = require("http")
 const fs = require("fs")
 const url = require("url")
 const IST = require("./IST")
-
-const myServer = http.createServer((req, res) => {
+function myHandler(req, res){
     if(req.url == '/favicon.ico'){
         return res.end()
     }
     console.log(req.url);
     const myUrl = url.parse(req.url, true) 
-    /*
-    req.url = http://localhost:8000/about?name=dinesh&id=77&tag=syrax
-    This is the imp statement. 
-    If you don't provide true to the url.parse(req.url), 
-    myUrl can't be a querystring and we get the response values as undefined.
-                    Name: undefined,
-                    id: undefined,
-                    tag: undefined 
-    */
     console.log(myUrl)
     const now = new Date()
     const enter = `${req.url}, ${req.method}, ${IST(now)}\n`
@@ -40,10 +30,16 @@ const myServer = http.createServer((req, res) => {
                     tag: ${tag}
                 `);
                 break;
+                case "/signup":
+                    if(req.method == "GET"){
+                        res.end("This is a sign-up form")
+                    } else if(req.method == "Post"){
+                        res.end("Success");
+                    }
             default:
                 res.end("404 - NOT FOUND");
         }
     })
-});
-
+}
+const myServer = http.createServer(myHandler);
 myServer.listen(8000, () => {console.log(`Server running on PORT 8000`)})
