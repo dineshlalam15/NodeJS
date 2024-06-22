@@ -8,5 +8,10 @@ Rest API - JSON
 5. DELETE/user/1 - delete the user with id 1
 
 mockaaroo.com: to geberate fake data. 
-
-
+1000 employees fake data is generated with 
+id
+first_name
+last_name
+email
+gender
+job_title

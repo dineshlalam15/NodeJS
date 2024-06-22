@@ -56,14 +56,6 @@
     "job_title": "Desktop Support Technician"
   },
   {
-    "id": 8,
-    "first_name": "Ambrosius",
-    "last_name": "Loweth",
-    "email": "aloweth7@bravesites.com",
-    "gender": "Bigender",
-    "job_title": "Financial Advisor"
-  },
-  {
     "id": 9,
     "first_name": "Adam",
     "last_name": "Panchin",
@@ -7998,5 +7990,37 @@
     "email": "sbidgoodrr@desdev.cn",
     "gender": "Female",
     "job_title": "Assistant Manager"
+  },
+  {
+    "id": 1001,
+    "first_name": "Dinesh",
+    "last_name": "Lalam",
+    "email": "dineshlalam15@gmail.com",
+    "gender": "Male",
+    "job_title": "Blockchain Developer"
+  },
+  {
+    "id": 1002,
+    "first_name": "Durga",
+    "last_name": "Prasad",
+    "email": "durgaprasad118@gmail.com",
+    "gender": "Male",
+    "job_title": "Full Stack Developer"
+  },
+  {
+    "id": 1003,
+    "first_name": "Govardhan",
+    "last_name": "Babbadi",
+    "email": "govardhanbabbadi@gmail.com",
+    "gender": "Male",
+    "job_title": "Junior Data Scientist"
+  },
+  {
+    "id": 1004,
+    "first_name": "Chelluri",
+    "last_name": "Keshav",
+    "email": "saikeshav420@gmail.com",
+    "gender": "Male",
+    "job_title": "Advance Application Engineer"
   }
 ]
