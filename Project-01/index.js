@@ -8,7 +8,8 @@ const app = express()
 // Middleware - Plugin
 app.use(express.urlencoded({extended: false}))
 
-app.route("/users/:id").get((req, res) => {
+app.route("/users/:id")
+.get((req, res) => {
     const id = Number(req.params.id)
     const user = users.find(element => element.id === id)
     if(user != null){
@@ -16,14 +17,41 @@ app.route("/users/:id").get((req, res) => {
     } else{
         return res.send(`User with id ${id} doesn't exist`)
     }
-}).put((req,res) => {
+})
+.put((req,res) => {
     return res.json({Status: "Pending"})
-}).patch((req,res) => {
-    return res.json({Status: "Pending"})
-}).delete((req,res) => {
+})
+.patch((req,res) => {
+    const body = req.body
     const id = Number(req.params.id)
-    if(users.find(element => element.id === id)){
-        users.splice(id-1, 1);
+    const index = users.findIndex(element => element.id === id)
+    if(index != -1){
+        const updatedUserDetails = {
+            id: index,
+            first_name: body.first_name,
+            last_name: body.last_name,
+            email: body.email,
+            gender: body.gender,
+            job_title: body.job_title
+        }
+        users[index] = updatedUserDetails
+        fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
+            if(err){
+                res.send(`Error: ${err}`)
+            } else{
+                return res.json({Status: "Succesfully Changed", id: id})
+            }
+        })
+    } else{
+        res.send(`User with id ${id} doesn't exist. Action can't be performed`)
+    }
+    
+})
+.delete((req,res) => {
+    const id = Number(req.params.id)
+    const index = users.findIndex(element => element.id === id);
+    if (index !== -1) {
+        users.splice(index, 1);
         fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
             if(err){
                 res.send(`ERROR: ${err}`)
