@@ -1,19 +1,11 @@
 [
   {
-    "id": 0,
+    "id": 2,
     "first_name": "Vishal",
     "last_name": "Dangudubiyyapu",
     "email": "vshaldb69fav@gmail.com",
     "gender": "Male",
     "job_title": "DevOps Engineer"
-  },
-  {
-    "id": 2,
-    "first_name": "Richard",
-    "last_name": "Smillie",
-    "email": "rsmillie1@wikia.com",
-    "gender": "Male",
-    "job_title": "Design Engineer"
   },
   {
     "id": 3,
