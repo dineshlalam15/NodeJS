@@ -70,14 +70,15 @@ app.get("/users", (req,res) => {
 app.post("/newUser", (req, res) => {
     const newUserID = users[users.length - 1].id + 1;
     const body = req.body
-    users.push({
+    const newUser = {
         id: newUserID,
         first_name: body.first_name,
         last_name: body.last_name,
         email: body.email,
         gender: body.gender,
         job_title: body.job_title
-    })
+    }
+    users.push(newUser)
     fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
         if(err){
             return res.send("Error", err)
