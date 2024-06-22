@@ -27,7 +27,7 @@ app.route("/users/:id")
     const index = users.findIndex(element => element.id === id)
     if(index != -1){
         const updatedUserDetails = {
-            id: index,
+            id: id,
             first_name: body.first_name,
             last_name: body.last_name,
             email: body.email,
