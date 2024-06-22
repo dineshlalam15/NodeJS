@@ -1,6 +1,7 @@
 const express = require('express')
 const fs = require('fs')
 const users = require('./MOCK_DATA.json')
+const e = require('express')
 const port = 8000
 const app = express()
 
@@ -9,11 +10,11 @@ app.use(express.urlencoded({extended: false}))
 
 app.route("/users/:id").get((req, res) => {
     const id = Number(req.params.id)
-    if(users.find(element => element.id === id)){
-        const user = users[id-1]
+    const user = users.find(element => element.id === id)
+    if(user != null){
         return res.json(user)
     } else{
-        return res.send(`User with this ${id} doesn't exist`)
+        return res.send(`User with id ${id} doesn't exist`)
     }
 }).put((req,res) => {
     return res.json({Status: "Pending"})
@@ -22,11 +23,16 @@ app.route("/users/:id").get((req, res) => {
 }).delete((req,res) => {
     const id = Number(req.params.id)
     if(users.find(element => element.id === id)){
-        const deletedUser = users[id-1]
-        users.splice(id-1, id-1);
-        return res.send(`Status: ${deletedUser} Succesfully deleted`)
+        users.splice(id-1, 1);
+        fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
+            if(err){
+                res.send(`ERROR: ${err}`)
+            } else{
+                res.json({Status: "Succesfully Deleted", id: id})
+            }
+        })
     } else{
-        return res.send(`User ${id} doesn't exist. Unable to perform the action.`)
+        return res.send(`User with id number ${id} doesn't exist. Unable to perform the action.`)
     }
 })
 
