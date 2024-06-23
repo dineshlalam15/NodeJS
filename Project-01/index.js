@@ -1,21 +1,23 @@
 const express = require('express')
 const fs = require('fs')
 const users = require('./MOCK_DATA.json')
-const e = require('express')
 const port = 8000
 const app = express()
 
-// Middleware - Plugin
 app.use(express.urlencoded({extended: false}))
+app.use((req,res, next) => {
+    console.log(`Hello from the middleware 1`)
+    next();
+})
 
 app.route("/users/:id")
 .get((req, res) => {
     const id = Number(req.params.id)
     const user = users.find(element => element.id === id)
     if(user != null){
-        return res.json(user)
+        return res.status(200).json(user)
     } else{
-        return res.send(`User with id ${id} doesn't exist`)
+        return res.status(404).send(`Error 404: User with id ${id} doesn't exist`)
     }
 })
 .put((req,res) => {
@@ -37,13 +39,13 @@ app.route("/users/:id")
         users[index] = updatedUserDetails
         fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
             if(err){
-                res.send(`Error: ${err}`)
+                res.status(200).send(`Error: ${err}`)
             } else{
                 return res.json({Status: "Succesfully Changed", id: id})
             }
         })
     } else{
-        res.send(`User with id ${id} doesn't exist. Action can't be performed`)
+        res.status(404).send(`User with id ${id} doesn't exist. Action can't be performed`)
     }
     
 })
@@ -56,11 +58,11 @@ app.route("/users/:id")
             if(err){
                 res.send(`ERROR: ${err}`)
             } else{
-                res.json({Status: "Succesfully Deleted", id: id})
+                res.status(200).json({Status: "User Data Succesfully Deleted", id: id})
             }
         })
     } else{
-        return res.send(`User with id number ${id} doesn't exist. Unable to perform the action.`)
+        return res.status(404).send(`User with id number ${id} doesn't exist. Unable to perform the action.`)
     }
 })
 
@@ -70,6 +72,9 @@ app.get("/users", (req,res) => {
 app.post("/newUser", (req, res) => {
     const newUserID = users[users.length - 1].id + 1;
     const body = req.body
+    if(!body || !body.first_name || !body.last_name || !body.email || !body.gender || !body.job_title){
+        return res.status(400).send(`Enter all the required fields of the user`)
+    }
     const newUser = {
         id: newUserID,
         first_name: body.first_name,
@@ -81,9 +86,9 @@ app.post("/newUser", (req, res) => {
     users.push(newUser)
     fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
         if(err){
-            return res.send("Error", err)
+            return res.send("ERROR", err)
         } else{
-            return res.json({Status: "Finished", id: newUserID})
+            return res.status(201).json({Status: "New User Created Succesfully", id: newUserID})
         }
     })
 })
