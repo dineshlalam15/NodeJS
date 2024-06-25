@@ -1,1 +1,0 @@
-mongodb+srv://dineshlalam15:Saibhavitha%401103@nodejs.vrgz9v7.mongodb.net/?retryWrites=true&w=majority&appName=NodeJS
