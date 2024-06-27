@@ -20,9 +20,6 @@ app.route("/users/:id")
         return res.status(404).send(`Error 404: User with id ${id} doesn't exist`)
     }
 })
-.put((req,res) => {
-    return res.json({Status: "Pending"})
-})
 .patch((req,res) => {
     const body = req.body
     const id = Number(req.params.id)

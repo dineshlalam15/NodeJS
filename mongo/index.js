@@ -51,3 +51,17 @@ app.post('/newuser', async (req, res) => {
         return res.status(500).json({error: 'Error occured while saving new person'})
     }
 })
+app.delete('/person/:FirstName', async (req, res) => {
+    const firstName = req.params.FirstName;
+    try {
+        const deletedPerson = await personModel.findOneAndDelete({ FirstName: firstName });
+        if (!deletedPerson) {
+            return res.status(404).json({ error: 'Person not found' });
+        }
+        console.log(deletedPerson)
+        return res.status(200).json({ message: 'Person deleted successfully', person: deletedPerson });
+    } catch (err) {
+        console.error('Error deleting person:', err);
+        return res.status(500).json({ error: 'Error occurred while deleting person' });
+    }
+})
