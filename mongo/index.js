@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const port = 8000;
 const app = express();
+app.use(express.json())
+
 const uri = process.env.MONGODB_URI;
 if (!uri) {
     console.log('MongoDB URI is not defined in the environment variables');
@@ -20,7 +22,6 @@ mongoose.connect(uri, {
     console.error('Error connecting to MongoDB Atlas:', err);
     process.exit(1);
 });
-
 const personModel = require('./models/person');
 app.get('/persons', async (req, res) => {
     try {
@@ -30,4 +31,23 @@ app.get('/persons', async (req, res) => {
         console.error('Error retrieving persons:', err);
         return res.status(500).json({ error: 'Error occurred while retrieving persons' });
     }
-});
+})
+app.post('/newuser', async (req, res) => {
+    const body = req.body
+    console.log('Request body:', req.body);
+    const newPerson = new personModel({
+        FirstName: body.FirstName,
+        LastName: body.LastName,
+        Gender: body.Gender,
+        Place: body.Place,
+        Industry: body.Industry,
+        Vehicle: body.Vehicle
+    })
+    try{
+        const savedPerson = await newPerson.save()
+        return res.status(201).json(savedPerson)
+    } catch (err) {
+        console.error('Error savong new person:', err)
+        return res.status(500).json({error: 'Error occured while saving new person'})
+    }
+})
