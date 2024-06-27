@@ -32,6 +32,21 @@ app.get('/persons', async (req, res) => {
         return res.status(500).json({ error: 'Error occurred while retrieving persons' });
     }
 })
+app.get('/person/:name', async (req, res) => {
+    const findName = req.params.name
+    try{
+        const findPerson = await personModel.findOne({FirstName: findName})
+        if(findPerson){
+            return res.status(201).json(findPerson)
+        } else{
+            return res.status(404).json({Error: 'Person with that name does not exist'})
+        }
+    } catch{
+        console.error('Error deleting person:', err);
+        return res.status(500).json({ error: 'Error occurred while fetching the person details' });
+    }
+
+})
 app.post('/newuser', async (req, res) => {
     const body = req.body
     console.log('Request body:', req.body);
@@ -63,5 +78,31 @@ app.delete('/person/:FirstName', async (req, res) => {
     } catch (err) {
         console.error('Error deleting person:', err);
         return res.status(500).json({ error: 'Error occurred while deleting person' });
+    }
+})
+app.patch('/person/:name', async (req, res) => {
+    const findName = req.params.name;
+    const body = req.body;
+    try {
+        const updatedPerson = await personModel.findOneAndUpdate(
+            { FirstName: findName },
+            {
+                FirstName: body.FirstName,
+                LastName: body.LastName,
+                Gender: body.Gender,
+                Place: body.Place,
+                Industry: body.Industry,
+                Vehicle: body.Vehicle
+            },
+            { new: true }
+        );
+        if (updatedPerson) {
+            return res.status(200).json(updatedPerson);
+        } else {
+            return res.status(404).json({ error: 'Person not found' });
+        }
+    } catch (err) {
+        console.error('Error updating person:', err);
+        return res.status(500).json({ error: 'Error occurred while editing the person details' });
     }
 })
