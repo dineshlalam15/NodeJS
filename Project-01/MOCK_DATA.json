@@ -1,13 +1,5 @@
 [
   {
-    "id": 2,
-    "first_name": "Vishal",
-    "last_name": "Dangudubiyyapu",
-    "email": "vshaldb69fav@gmail.com",
-    "gender": "Male",
-    "job_title": "DevOps Engineer"
-  },
-  {
     "id": 3,
     "first_name": "Chad",
     "last_name": "Savery",
@@ -7974,37 +7966,5 @@
     "email": "sbidgoodrr@desdev.cn",
     "gender": "Female",
     "job_title": "Assistant Manager"
-  },
-  {
-    "id": 1001,
-    "first_name": "Dinesh",
-    "last_name": "Lalam",
-    "email": "dineshlalam15@gmail.com",
-    "gender": "Male",
-    "job_title": "Blockchain Developer"
-  },
-  {
-    "id": 1002,
-    "first_name": "Durga",
-    "last_name": "Prasad",
-    "email": "durgaprasad118@gmail.com",
-    "gender": "Male",
-    "job_title": "Full Stack Developer"
-  },
-  {
-    "id": 1003,
-    "first_name": "Govardhan",
-    "last_name": "Babbadi",
-    "email": "govardhanbabbadi@gmail.com",
-    "gender": "Male",
-    "job_title": "Junior Data Scientist"
-  },
-  {
-    "id": 1004,
-    "first_name": "Chelluri",
-    "last_name": "Keshav",
-    "email": "saikeshav420@gmail.com",
-    "gender": "Male",
-    "job_title": "Advance Application Engineer"
   }
 ]
