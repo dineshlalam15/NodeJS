@@ -2,6 +2,7 @@ const express = require('express')
 // const fs = require('fs')
 // const users = require('./MOCK_DATA.json')
 const MongoDB = require('mongoose')
+require('dotenv').config()
 
 const port = 8000
 const app = express()
@@ -14,7 +15,8 @@ const app = express()
 // })
 
 // Mongo Connection
-MongoDB.connect('mongodb+srv://dineshlalam15:qwerty1234@sample.t2tq8la.mongodb.net/')
+const uri = process.env.ConnectionURI
+MongoDB.connect(uri)
 
 // Schema
 const dataSchema = new MongoDB.Schema({
