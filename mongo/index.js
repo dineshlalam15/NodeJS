@@ -4,7 +4,9 @@ require('dotenv').config();
 
 const port = 8000;
 const app = express();
+
 app.use(express.json())
+app.use(express.urlencoded({extended: false}))
 
 const uri = process.env.MONGODB_URI;
 if (!uri) {
@@ -66,7 +68,6 @@ app.route('/person/:name')
         console.error('Error deleting person:', err);
         return res.status(500).json({ error: 'Error occurred while fetching the person details' });
     }
-
 })
 .delete(async (req, res) => {
     const firstName = req.params.name
