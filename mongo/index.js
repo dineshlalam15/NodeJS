@@ -32,21 +32,6 @@ app.get('/persons', async (req, res) => {
         return res.status(500).json({ error: 'Error occurred while retrieving persons' });
     }
 })
-app.get('/person/:name', async (req, res) => {
-    const findName = req.params.name
-    try{
-        const findPerson = await personModel.findOne({FirstName: findName})
-        if(findPerson){
-            return res.status(201).json(findPerson)
-        } else{
-            return res.status(404).json({Error: 'Person with that name does not exist'})
-        }
-    } catch{
-        console.error('Error deleting person:', err);
-        return res.status(500).json({ error: 'Error occurred while fetching the person details' });
-    }
-
-})
 app.post('/newuser', async (req, res) => {
     const body = req.body
     console.log('Request body:', req.body);
@@ -66,8 +51,25 @@ app.post('/newuser', async (req, res) => {
         return res.status(500).json({error: 'Error occured while saving new person'})
     }
 })
-app.delete('/person/:FirstName', async (req, res) => {
-    const firstName = req.params.FirstName;
+
+app.route('/person/:name')
+.get(async (req, res) => {
+    const findName = req.params.name
+    try{
+        const findPerson = await personModel.findOne({FirstName: findName})
+        if(findPerson){
+            return res.status(201).json(findPerson)
+        } else{
+            return res.status(404).json({Error: 'Person with that name does not exist'})
+        }
+    } catch{
+        console.error('Error deleting person:', err);
+        return res.status(500).json({ error: 'Error occurred while fetching the person details' });
+    }
+
+})
+.delete(async (req, res) => {
+    const firstName = req.params.name
     try {
         const deletedPerson = await personModel.findOneAndDelete({ FirstName: firstName });
         if (!deletedPerson) {
@@ -80,7 +82,7 @@ app.delete('/person/:FirstName', async (req, res) => {
         return res.status(500).json({ error: 'Error occurred while deleting person' });
     }
 })
-app.patch('/person/:name', async (req, res) => {
+.patch(async (req, res) => {
     const findName = req.params.name;
     const body = req.body;
     try {
