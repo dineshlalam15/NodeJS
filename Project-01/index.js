@@ -74,11 +74,33 @@ app.get('/users/:id', async (req, res) => {
 app.delete('/users/:id', async (req, res) => {
     try{
         const deletedUser = await dataModel.findOneAndDelete({id: Number(req.params.id)})
-        const result = deletedUser ? res.status(200).json({User: deletedUser, Message: "User deleted succesfully"}) : res.status(404).json({Error: "User with this id number doesn't exist"})  
+        const result = deletedUser ? res.status(200).json({User: deletedUser, Message: "User deleted succesfully"}) : res.status(404).json({Error: `User with id number ${Number(req.params.id)} doesn't exist`})  
         return result
     } catch(err){
         console.log(err)
         return res.status(500).json({Error: err})
+    }
+})
+app.patch('/users/:id', async(req,res) => {
+    const checkId = Number(req.params.id)
+    try{
+        const findUser = await dataModel.findOne({id: checkId})
+        if(!findUser){
+            return res.status(404).json({"Message": `User with this ${checkId} doesn't exist`})
+        }
+        const body = req.body
+        const editedDetails = {}
+        editedDetails.id = checkId
+        editedDetails.FirstName = body.FirstName ? body.FirstName : findUser.FirstName
+        editedDetails.LastName = body.LastName ? body.LastName : findUser.LastName
+        editedDetails.gender = body.gender ? body.gender : findUser.gender
+        editedDetails.email = body.email ? body.email : findUser.email
+        editedDetails.Job = body.Job ? body.Job : findUser.Job
+        const editUser = await dataModel.findOneAndUpdate({id: checkId}, {$set: editedDetails}, {new: true})
+        return res.status(200).json({"Updated Details": editedDetails, "Message": "Details updated succesfully"})
+    } catch(err){
+        console.log(err)
+        return res.status(500).json("Internal Server Error")
     }
 })
 app.post('/newuser', async(req, res) => {
