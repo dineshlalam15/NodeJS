@@ -24,9 +24,9 @@ MongoDB.connect(uri, {
 })
 
 const dataSchema = new MongoDB.Schema({
-    id: {
+    id:{
         type: Number,
-        required: true,
+        require: true,
         unique: true
     },
     FirstName: {
@@ -64,11 +64,8 @@ app.get('/users', async (req, res) => {
 app.get('/users/:id', async (req, res) => {
     try{
         const findUser = await dataModel.findOne({id: Number(req.params.id)})
-        if(findUser){
-            return res.status(200).json(findUser)
-        } else{
-            return res.status(404).json({Error: "Person with that id don't exist"})
-        }
+        const result = findUser ? res.status(200).json(findUser) : res.status(404).json({Error: "Person with that id don't exist"})
+        return result
     } catch(err){
         console.log(err)
         return res.status(500).json({Error: 'Internal Server Error'})
@@ -78,9 +75,8 @@ app.post('/newuser', async(req, res) => {
     const body = req.body
     console.log(body)
     try{
-        const count = await dataModel.countDocuments({})
-        const lastUser = await dataModel.findOne().skip(count - 1)
-        const newUserId = lastUser.id + 1
+        const lastUser = await dataModel.findOne().sort({ id: -1 });
+        const newUserId = lastUser ? lastUser.id + 1 : 1;
         const newUser = new dataModel({
             id: newUserId,
             FirstName: body.FirstName,
