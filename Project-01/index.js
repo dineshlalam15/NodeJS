@@ -1,25 +1,34 @@
 const express = require('express')
-// const fs = require('fs')
-// const users = require('./MOCK_DATA.json')
 const MongoDB = require('mongoose')
 require('dotenv').config()
 
 const port = 8000
 const app = express()
 
-// app.use(express.urlencoded({extended: false}))
-
-// app.use((req,res, next) => {
-//     console.log(`Hello from the middleware 1`)
-//     next();
-// })
-
-// Mongo Connection
+app.use(express.json())
 const uri = process.env.ConnectionURI
-MongoDB.connect(uri)
+if(!uri){
+    console.log('uri is not defined in the environiment variables')
+    process.exit(1)
+}
+MongoDB.connect(uri, {
+    serverSelectionTimeoutMS: 5000
+}).then(() => {
+    console.log('Connected to MongoDB Atlas')
+    app.listen(port, () => {
+        console.log('Server running on PORT', port)
+    })
+}).catch((err) => {
+    console.log('Error connecting to MongoDB Atlas', err)
+    process.exit(1)
+})
 
-// Schema
 const dataSchema = new MongoDB.Schema({
+    id: {
+        type: Number,
+        required: true,
+        unique: true
+    },
     FirstName: {
         type: String,
         require: true,
@@ -43,7 +52,7 @@ const dataSchema = new MongoDB.Schema({
     }
 })
 const dataModel = MongoDB.model('dataModel', dataSchema, 'Data')
-app.get('/data', async (req, res) => {
+app.get('/users', async (req, res) => {
     try{
         const data = await dataModel.find({})
         return res.json(data)
@@ -52,88 +61,38 @@ app.get('/data', async (req, res) => {
         return res.status(500).json({error: 'Error occured while retrieving persons'})
     }
 })
-
-
-
-
-// app.route("/users/:id")
-// .get((req, res) => {
-//     const id = Number(req.params.id)
-//     const user = users.find(element => element.id === id)
-//     if(user != null){
-//         return res.status(200).json(user)
-//     } else{
-//         return res.status(404).send(`Error 404: User with id ${id} doesn't exist`)
-//     }
-// })
-// .patch((req,res) => {
-//     const body = req.body
-//     const id = Number(req.params.id)
-//     const index = users.findIndex(element => element.id === id)
-//     if(index != -1){
-//         const updatedUserDetails = {
-//             id: id,
-//             first_name: body.first_name,
-//             last_name: body.last_name,
-//             email: body.email,
-//             gender: body.gender,
-//             job_title: body.job_title
-//         }
-//         users[index] = updatedUserDetails
-//         fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
-//             if(err){
-//                 res.status(200).send(`Error: ${err}`)
-//             } else{
-//                 return res.json({Status: "Succesfully Changed", id: id})
-//             }
-//         })
-//     } else{
-//         res.status(404).send(`User with id ${id} doesn't exist. Action can't be performed`)
-//     }
-    
-// })
-// .delete((req,res) => {
-//     const id = Number(req.params.id)
-//     const index = users.findIndex(element => element.id === id);
-//     if (index !== -1) {
-//         users.splice(index, 1);
-//         fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
-//             if(err){
-//                 res.send(`ERROR: ${err}`)
-//             } else{
-//                 res.status(200).json({Status: "User Data Succesfully Deleted", id: id})
-//             }
-//         })
-//     } else{
-//         return res.status(404).send(`User with id number ${id} doesn't exist. Unable to perform the action.`)
-//     }
-// })
-
-// app.get("/users", (req,res) => {
-//     return res.json(users)
-// })
-// app.post("/newUser", (req, res) => {
-//     const newUserID = users[users.length - 1].id + 1;
-//     const body = req.body
-//     if(!body || !body.first_name || !body.last_name || !body.email || !body.gender || !body.job_title){
-//         return res.status(400).send(`Enter all the required fields of the user`)
-//     }
-//     const newUser = {
-//         id: newUserID,
-//         first_name: body.first_name,
-//         last_name: body.last_name,
-//         email: body.email,
-//         gender: body.gender,
-//         job_title: body.job_title
-//     }
-//     users.push(newUser)
-//     fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err) => {
-//         if(err){
-//             return res.send("ERROR", err)
-//         } else{
-//             return res.status(201).json({Status: "New User Created Succesfully", id: newUserID})
-//         }
-//     })
-// })
-
-app.listen(port, () => console.log(`Server running on port`, port))
+app.get('/users/:id', async (req, res) => {
+    try{
+        const findUser = await dataModel.findOne({id: Number(req.params.id)})
+        if(findUser){
+            return res.status(200).json(findUser)
+        } else{
+            return res.status(404).json({Error: "Person with that id don't exist"})
+        }
+    } catch(err){
+        console.log(err)
+        return res.status(500).json({Error: 'Internal Server Error'})
+    }
+})
+app.post('/newuser', async(req, res) => {
+    const body = req.body
+    console.log(body)
+    try{
+        const count = await dataModel.countDocuments({})
+        const lastUser = await dataModel.findOne().skip(count - 1)
+        const newUserId = lastUser.id + 1
+        const newUser = new dataModel({
+            id: newUserId,
+            FirstName: body.FirstName,
+            LastName: body.LastName,
+            gender: body.gender,
+            email: body.email,
+            Job: body.Job
+        })
+        const data = await newUser.save()
+        return res.status(201).json(data)
+    } catch(err){
+        console.log(err)
+        return res.status(500).json({error: 'Error occured while saving a new user'})
+    }
+})
