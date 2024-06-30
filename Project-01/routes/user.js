@@ -1,28 +1,50 @@
 const express = require('express');
-const dataModel = require('../models/user');
+const dataModel = require('../models/user.js');
 
 const router = express.Router();
 
-const validateId = (id) => {
-    const parsedId = Number(id);
-    if (isNaN(parsedId) || parsedId < 0) {
-        return false;
+router.get('/', async (req, res) => {
+    try {
+        const data = await dataModel.find({});
+        res.json(data);
+    } catch (err) {
+        console.log('Error retrieving the data', err);
+        res.status(500).json({ error: 'Error occurred while retrieving persons' });
     }
-    return parsedId;
-};
+});
+
+router.post('/newuser', async (req, res) => {
+    const body = req.body;
+    try {
+        const lastUser = await dataModel.findOne().sort({ id: -1 });
+        console.log(lastUser)
+        const newUserId = lastUser ? lastUser.id + 1 : 1;
+        const newUser = new dataModel({
+            id: newUserId,
+            FirstName: body.FirstName,
+            LastName: body.LastName,
+            gender: body.gender,
+            email: body.email,
+            Job: body.Job
+        });
+        console.log(newUser)
+        const data = await newUser.save();
+        res.status(201).json(data);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Error occurred while saving a new user' });
+    }
+});
 
 router.route('/:id')
     .get(async (req, res) => {
-        const id = validateId(req.params.id);
-        if (!id) {
-            return res.status(400).json({ Error: "Invalid ID parameter" });
-        }
+        const id = Number(req.params.id);
         try {
-            const findUser = await dataModel.findOne({ id });
+            const findUser = await dataModel.findOne({ id: id });
             if (findUser) {
                 res.status(200).json(findUser);
             } else {
-                res.status(404).json({ Error: "Person with that id doesn't exist" });
+                res.status(404).json({ Error: `Person with id ${id} doesn't exist` });
             }
         } catch (err) {
             console.log(err);
@@ -71,36 +93,5 @@ router.route('/:id')
             res.status(500).json("Internal Server Error");
         }
     });
-
-router.get('/', async (req, res) => {
-    try {
-        const data = await dataModel.find({});
-        res.json(data);
-    } catch (err) {
-        console.log('Error retrieving the data', err);
-        res.status(500).json({ error: 'Error occurred while retrieving persons' });
-    }
-});
-
-router.post('/newuser', async (req, res) => {
-    const body = req.body;
-    try {
-        const lastUser = await dataModel.findOne().sort({ id: -1 });
-        const newUserId = lastUser ? lastUser.id + 1 : 1;
-        const newUser = new dataModel({
-            id: newUserId,
-            FirstName: body.FirstName,
-            LastName: body.LastName,
-            gender: body.gender,
-            email: body.email,
-            Job: body.Job
-        });
-        const data = await newUser.save();
-        res.status(201).json(data);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: 'Error occurred while saving a new user' });
-    }
-});
 
 module.exports = router;
