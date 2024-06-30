@@ -71,6 +71,16 @@ app.get('/users/:id', async (req, res) => {
         return res.status(500).json({Error: 'Internal Server Error'})
     }
 })
+app.delete('/users/:id', async (req, res) => {
+    try{
+        const deletedUser = await dataModel.findOneAndDelete({id: Number(req.params.id)})
+        const result = deletedUser ? res.status(200).json({User: deletedUser, Message: "User deleted succesfully"}) : res.status(404).json({Error: "User with this id number doesn't exist"})  
+        return result
+    } catch(err){
+        console.log(err)
+        return res.status(500).json({Error: err})
+    }
+})
 app.post('/newuser', async(req, res) => {
     const body = req.body
     console.log(body)
