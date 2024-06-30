@@ -1,126 +1,22 @@
-const express = require('express')
-const MongoDB = require('mongoose')
-require('dotenv').config()
+const express = require('express');
+const connectMongoDB = require('./connection');
+require('dotenv').config();
 
-const port = 8000
-const app = express()
+const router = require('./routes/user');
+const port = 8000;
+const app = express();
 
-app.use(express.json())
-const uri = process.env.ConnectionURI
-if(!uri){
-    console.log('uri is not defined in the environiment variables')
-    process.exit(1)
-}
-MongoDB.connect(uri, {
-    serverSelectionTimeoutMS: 5000
-}).then(() => {
-    console.log('Connected to MongoDB Atlas')
-    app.listen(port, () => {
-        console.log('Server running on PORT', port)
+app.use(express.json());
+app.use('/users', router);
+
+const uri = process.env.ConnectionURI;
+connectMongoDB(uri)
+    .then(() => {
+        app.listen(port, () => {
+            console.log(`Server started at PORT ${port}`);
+        });
     })
-}).catch((err) => {
-    console.log('Error connecting to MongoDB Atlas', err)
-    process.exit(1)
-})
-
-const dataSchema = new MongoDB.Schema({
-    id:{
-        type: Number,
-        require: true,
-        unique: true
-    },
-    FirstName: {
-        type: String,
-        require: true,
-    },
-    LastName: {
-        type: String,
-        require: true
-    },
-    gender: {
-        type: String,
-        require: true
-    },
-    email: {
-        type: String,
-        require: true,
-        unique: true
-    },
-    Job: {
-        type: String,
-        require: true
-    }
-})
-const dataModel = MongoDB.model('dataModel', dataSchema, 'Data')
-app.get('/users', async (req, res) => {
-    try{
-        const data = await dataModel.find({})
-        return res.json(data)
-    } catch(err){
-        console.log('Error retreiving the data', err)
-        return res.status(500).json({error: 'Error occured while retrieving persons'})
-    }
-})
-app.get('/users/:id', async (req, res) => {
-    try{
-        const findUser = await dataModel.findOne({id: Number(req.params.id)})
-        const result = findUser ? res.status(200).json(findUser) : res.status(404).json({Error: "Person with that id don't exist"})
-        return result
-    } catch(err){
-        console.log(err)
-        return res.status(500).json({Error: 'Internal Server Error'})
-    }
-})
-app.delete('/users/:id', async (req, res) => {
-    try{
-        const deletedUser = await dataModel.findOneAndDelete({id: Number(req.params.id)})
-        const result = deletedUser ? res.status(200).json({User: deletedUser, Message: "User deleted succesfully"}) : res.status(404).json({Error: `User with id number ${Number(req.params.id)} doesn't exist`})  
-        return result
-    } catch(err){
-        console.log(err)
-        return res.status(500).json({Error: err})
-    }
-})
-app.patch('/users/:id', async(req,res) => {
-    const checkId = Number(req.params.id)
-    try{
-        const findUser = await dataModel.findOne({id: checkId})
-        if(!findUser){
-            return res.status(404).json({"Message": `User with this ${checkId} doesn't exist`})
-        }
-        const body = req.body
-        const editedDetails = {}
-        editedDetails.id = checkId
-        editedDetails.FirstName = body.FirstName ? body.FirstName : findUser.FirstName
-        editedDetails.LastName = body.LastName ? body.LastName : findUser.LastName
-        editedDetails.gender = body.gender ? body.gender : findUser.gender
-        editedDetails.email = body.email ? body.email : findUser.email
-        editedDetails.Job = body.Job ? body.Job : findUser.Job
-        const editUser = await dataModel.findOneAndUpdate({id: checkId}, {$set: editedDetails}, {new: true})
-        return res.status(200).json({"Updated Details": editedDetails, "Message": "Details updated succesfully"})
-    } catch(err){
-        console.log(err)
-        return res.status(500).json("Internal Server Error")
-    }
-})
-app.post('/newuser', async(req, res) => {
-    const body = req.body
-    console.log(body)
-    try{
-        const lastUser = await dataModel.findOne().sort({ id: -1 });
-        const newUserId = lastUser ? lastUser.id + 1 : 1;
-        const newUser = new dataModel({
-            id: newUserId,
-            FirstName: body.FirstName,
-            LastName: body.LastName,
-            gender: body.gender,
-            email: body.email,
-            Job: body.Job
-        })
-        const data = await newUser.save()
-        return res.status(201).json(data)
-    } catch(err){
-        console.log(err)
-        return res.status(500).json({error: 'Error occured while saving a new user'})
-    }
-})
+    .catch(err => {
+        console.error('Failed to connect to MongoDB', err);
+        process.exit(1);
+    });
