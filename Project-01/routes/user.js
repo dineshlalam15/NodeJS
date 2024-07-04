@@ -52,7 +52,7 @@ router.route('/:id')
         }
     })
     .delete(async (req, res) => {
-        const id = validateId(req.params.id);
+        const id = Number(req.params.id);
         if (!id) {
             return res.status(400).json({ Error: "Invalid ID parameter" });
         }
@@ -69,7 +69,7 @@ router.route('/:id')
         }
     })
     .patch(async (req, res) => {
-        const id = validateId(req.params.id);
+        const id = Number(req.params.id);
         if (!id) {
             return res.status(400).json({ Error: "Invalid ID parameter" });
         }
