@@ -8,6 +8,34 @@ const app = express();
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
+const personSchema = new mongoose.Schema({
+    FirstName: { 
+        type: String, 
+        required: true 
+    },
+    LastName: { 
+        type: String, 
+        required: true 
+    },
+    Gender: { 
+        type: String, 
+        required: true 
+    },
+    Place: { 
+        type: String, 
+        required: true 
+    },
+    Industry: { 
+        type: String, 
+        required: true 
+    },
+    Vehicle: { 
+        type: String, 
+        required: true 
+    }
+})
+const personModel = mongoose.model('personModel', personSchema, 'people');
+
 const uri = process.env.MONGODB_URI;
 if (!uri) {
     console.log('MongoDB URI is not defined in the environment variables');
@@ -24,7 +52,7 @@ mongoose.connect(uri, {
     console.error('Error connecting to MongoDB Atlas:', err);
     process.exit(1);
 });
-const personModel = require('./models/person');
+
 app.get('/persons', async (req, res) => {
     try {
         const persons = await personModel.find({})
@@ -37,7 +65,7 @@ app.get('/persons', async (req, res) => {
 app.post('/newuser', async (req, res) => {
     const body = req.body
     console.log('Request body:', req.body);
-    const newPerson = new personModel({
+    const newPerson = new personSchema({
         FirstName: body.FirstName,
         LastName: body.LastName,
         Gender: body.Gender,
@@ -58,7 +86,7 @@ app.route('/person/:name')
 .get(async (req, res) => {
     const findName = req.params.name
     try{
-        const findPerson = await personModel.findOne({FirstName: findName})
+        const findPerson = await personSchema.findOne({FirstName: findName})
         if(findPerson){
             return res.status(201).json(findPerson)
         } else{
@@ -72,7 +100,7 @@ app.route('/person/:name')
 .delete(async (req, res) => {
     const firstName = req.params.name
     try {
-        const deletedPerson = await personModel.findOneAndDelete({ FirstName: firstName });
+        const deletedPerson = await personSchema.findOneAndDelete({ FirstName: firstName });
         if (!deletedPerson) {
             return res.status(404).json({ error: 'Person not found' });
         }
@@ -87,7 +115,7 @@ app.route('/person/:name')
     const findName = req.params.name;
     const body = req.body;
     try {
-        const updatedPerson = await personModel.findOneAndUpdate(
+        const updatedPerson = await personSchema.findOneAndUpdate(
             { FirstName: findName },
             {
                 FirstName: body.FirstName,
