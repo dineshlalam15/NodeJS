@@ -65,7 +65,7 @@ app.get('/persons', async (req, res) => {
 app.post('/newuser', async (req, res) => {
     const body = req.body
     console.log('Request body:', req.body);
-    const newPerson = new personSchema({
+    const newPerson = new personModel({
         FirstName: body.FirstName,
         LastName: body.LastName,
         Gender: body.Gender,
@@ -86,7 +86,7 @@ app.route('/person/:name')
 .get(async (req, res) => {
     const findName = req.params.name
     try{
-        const findPerson = await personSchema.findOne({FirstName: findName})
+        const findPerson = await personModel.findOne({FirstName: findName})
         if(findPerson){
             return res.status(201).json(findPerson)
         } else{
@@ -100,7 +100,7 @@ app.route('/person/:name')
 .delete(async (req, res) => {
     const firstName = req.params.name
     try {
-        const deletedPerson = await personSchema.findOneAndDelete({ FirstName: firstName });
+        const deletedPerson = await personModel.findOneAndDelete({ FirstName: firstName });
         if (!deletedPerson) {
             return res.status(404).json({ error: 'Person not found' });
         }
@@ -115,15 +115,19 @@ app.route('/person/:name')
     const findName = req.params.name;
     const body = req.body;
     try {
-        const updatedPerson = await personSchema.findOneAndUpdate(
+        const findPerson = await personModel.findOne({FirstName: findName})
+        if(!findPerson){
+            return res.status(404).json({"Message": `User with first name ${findName} doesn't exist`})
+        }
+        const updatedPerson = await personModel.findOneAndUpdate(
             { FirstName: findName },
             {
-                FirstName: body.FirstName,
-                LastName: body.LastName,
-                Gender: body.Gender,
-                Place: body.Place,
-                Industry: body.Industry,
-                Vehicle: body.Vehicle
+                FirstName: body.FirstName ? body.FirstName : findPerson.FirstName,
+                LastName: body.LastName ? body.LastName : findPerson.LastName,
+                Gender: body.Gender ? body.Gender : findPerson.Gender,
+                Place: body.Place ? body.Place : findPerson.Place,
+                Industry: body.Industry ? body.Industry : findPerson.Industry,
+                Vehicle: body.Vehicle ? body.Vehicle : findPerson.Vehicle
             },
             { new: true }
         );
