@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const urlSchema = new mongoose.Schema({
     shortId: {
         type: String,
@@ -10,7 +10,7 @@ const urlSchema = new mongoose.Schema({
         required: true,
     },
     visitHistory: [{ timestamp: { type: Number } }],
-}, {timestamps: true})
+}, { timestamps: true });
 
 const URLModel = mongoose.model('URLModel', urlSchema, 'ShortURL');
 module.exports = URLModel;

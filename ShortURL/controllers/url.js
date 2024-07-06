@@ -1,19 +1,18 @@
 const shortid = require('shortid');
 const URLModel = require("../models/url");
 
-//Post Request
-async function generateNewShortURL(req, res){
+async function generateNewShortURL(req, res) {
     const body = req.body;
-    if(!body.url){
-        return res.status(400).json({error: "URL is required"});
+    if (!body.url) {
+        return res.status(400).json({ error: "URL is required" });
     }
-    const shortID = shortid()
+    const shortId = shortid.generate();
     await URLModel.create({
-        shortId: shortID,
+        shortId: shortId,
         redirectURL: body.url,
         visitHistory: [],
-    })
-    return res.json({id: shortID})
+    });
+    return res.json({ id: shortId });
 }
 
-module.exports = {generateNewShortURL,};
+module.exports = { generateNewShortURL };
