@@ -1,7 +1,5 @@
 const express = require('express');
-const {handleGenerateNewShortURL} = require('../controllers/url.js')
+const {generateNewShortURL} = require('../controllers/url.js')
 const router = express.Router();
-
-router.post('/', handleGenerateNewShortURL);
-
+router.post('/', generateNewShortURL);
 module.exports = router;
