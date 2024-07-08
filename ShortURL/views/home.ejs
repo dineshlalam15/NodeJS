@@ -1,23 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-    </style>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Shortener</title>
 </head>
 <body>
-    <h1>URL Shortener</h1>
-    <div>
-        <form method = "post", action="/url">
-            <label>Enter your original URL</label>
-            <input type = "text" name = "redirectURL" placeholder="https://example.com"/>
-            <button type="submit">Generate</button>
-        </form>
-    </div>
+  <h1>URL Shortener</h1>
+  <div>
+    <label for="redirectURL">Enter your original URL</label>
+    <input type="text" id="redirectURL" name="redirectURL" placeholder="https://example.com">
+    <button type="button" onclick="generateShortUrl()">Generate</button>
+    <a id="shortenedUrl" href="#" target="_blank">Here will be url</a>
+  </div>
+
+  <script>
+    async function generateShortUrl() {
+      const originalUrl = document.getElementById('redirectURL').value.trim();
+      const shortenedUrlElement = document.getElementById('shortenedUrl');
+      const apiUrl = 'http://localhost:8001/url';
+      
+      if (!originalUrl || !isValidUrl(originalUrl)) {
+        shortenedUrlElement.textContent = 'Please enter a valid URL.';
+        return;
+      }
+      
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          body: JSON.stringify({ url: originalUrl }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        const shortenedData = await response.json();
+        const shortenedUrl = `http://localhost:8001/${shortenedData.id}`;
+        
+        shortenedUrlElement.href = shortenedUrl;
+        shortenedUrlElement.textContent = "Click Here ! Link Genereated";
+      } catch (error) {
+        console.error('Error fetching shortened URL:', error);
+        shortenedUrlElement.textContent = 'An error occurred. Please try again later.';
+      }
+    }
+
+    function isValidUrl(url) {
+      const urlRegex = /^(http|https):\/\/\S+$/;
+      return urlRegex.test(url);
+    }
+  </script>
 </body>
 </html>
