@@ -19,11 +19,32 @@ connectToMongoDB(ConnectionURI)
     process.exit(1);
 });
 
+app.set("view engine", 'ejs');
+app.get('/favicon.ico', (req, res) => res.status(204));
 app.use(express.json())
 app.use('/url', URLRouter);
 
+
+app.get('/test', async (req, res) => {
+    const allURLs = await URLModel.find({});
+    return res.end(`
+        <html>
+            <head></head>
+            <body>
+                <ol>
+                ${allURLs.map(url => `<li>${url.shortId} - ${url.redirectURL} - ${url.visitHistory.length}</li>`).join('')}
+                </ol>
+            </body>
+        </html>
+    `)
+})
+
 app.get('/:shortid', async(req, res) => {
     const shortId = req.params.shortid;
+    console.log(shortId)
+    if(!shortId){
+        return res.status(404).send(`shortId ${shortId} invalid`)
+    }
     const entry = await URLModel.findOneAndUpdate(
         {
             shortId,
@@ -36,6 +57,6 @@ app.get('/:shortid', async(req, res) => {
             },
         },
     );
-    console.log("Redirected URL:",entry.redirectURL);
-    return res.status(302).redirect(entry.redirectURL);
+    console.log(entry.redirectURL)
+    return res.status(200).redirect(entry.redirectURL);
 });
