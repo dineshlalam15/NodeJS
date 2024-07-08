@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const {connectToMongoDB} = require('./connection.js');
 const URLRouter = require('./routes/url.js');
+const staticRouter = require('./routes/staticRouter.js');
 const URLModel = require('./models/url.js')
 require('dotenv').config();
 
@@ -24,19 +25,13 @@ app.set("views", path.resolve("./views"));
 app.set("view engine", 'ejs');
 app.get('/favicon.ico', (req, res) => res.status(204));
 app.use(express.json())
+app.use(express.urlencoded({extended: false}));
 app.use('/url', URLRouter);
-
-
-app.get('/test', async (req, res) => {
-    const allURLs = await URLModel.find({});
-    return res.render('home', {
-        urls: allURLs,
-    });
-})
+app.use('/', staticRouter);
 
 app.get('/:shortid', async(req, res) => {
     const shortId = req.params.shortid;
-    console.log(shortId)
+    console.log("shortId: ", shortId) // To Debug
     if(!shortId){
         return res.status(404).send(`shortId ${shortId} invalid`)
     }
@@ -52,6 +47,6 @@ app.get('/:shortid', async(req, res) => {
             },
         },
     );
-    console.log(entry.redirectURL)
+    console.log("Original URL: ", entry.redirectURL) // To Debug
     return res.status(200).redirect(entry.redirectURL);
 });

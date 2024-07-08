@@ -3,6 +3,7 @@ const URLModel = require("../models/url");
 
 async function handleGenerateNewShortURL(req, res) {
     const body = req.body;
+    console.log("Request URL for ShortID: ", body.url)
     if (!body.url) {
         return res.status(400).json({ error: "URL is required" });
     }
