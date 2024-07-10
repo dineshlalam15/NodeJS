@@ -8,7 +8,33 @@ const app = express();
 const port = process.env.PORT || 4000
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
+    const details = [
+    {
+        id: 1,
+        name: "Dinesh",
+        dept: "Metallurgy & Materials Engineering",
+    },
+    {
+        id: 2,
+        name: "Vishnu Vardhan Reddy",
+        dept: "Electrical Engineering",
+    },
+    {
+        id: 3,
+        name: "Bhuvan Chandra",
+        dept: "Mechanical Engineering",
+    },
+    {
+        id: 4,
+        name: "Dilleswar Reddy",
+        dept: "Aerospace Engineering & Applied Mechanics",
+    },
+    {
+        id: 5,
+        name: "Chirag Vaibhav",
+        dept: "Computer Science and Technology",
+    }]
+    return res.json(details)
 })
 
 app.listen(port, () => {
