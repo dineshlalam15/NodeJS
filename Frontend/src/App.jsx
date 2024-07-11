@@ -29,6 +29,12 @@ function App() {
       </div>
       <h1>Halo fellaas</h1>
       <p>Details: {details.length}</p>
+      {details.map((element) => (
+        <div key={element.id}>
+          <h3>{element.name}</h3>
+          <p>{element.dept}</p>
+        </div>
+      ))}
     </>
   )
 }
