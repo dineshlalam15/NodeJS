@@ -1,4 +1,6 @@
 import express from 'express';
+import cors from 'cors';
+
 (async () => {
     const dotenv = await import('dotenv');
     dotenv.config();
@@ -6,6 +8,8 @@ import express from 'express';
 
 const app = express();
 const port = process.env.PORT || 4000
+
+app.use(cors())
 
 app.get('/api/details', (req, res) => {
     const details = [
