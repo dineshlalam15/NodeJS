@@ -7,14 +7,21 @@ import axios from 'axios'
 function App() {
   const [details, setDetails] = useState([]);
 
+  // useEffect(() => {
+  //   axios.get('http://localhost:4000/api/details')
+  //     .then((res) => {
+  //       setDetails(res.data);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // }, []);
+
   useEffect(() => {
-    axios.get('http://localhost:4000/api/details')
-      .then((res) => {
-        setDetails(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    fetch('/api/data')
+      .then(response => response.json())
+      .then(data => setData(data))
+      .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   return (
