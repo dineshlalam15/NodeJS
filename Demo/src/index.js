@@ -10,8 +10,10 @@ const app = express();
 (async () => {
     try {
         await mongoose.connect(mongoDB);
-        console.log("Connected to the Database");
-        console.log("Connection String:", mongoDB);
+        app.on("Error", (error) => {
+            console.error("Error", error);
+            throw error
+        })
         app.listen(port, () => {
             console.log(`Application running on PORT ${port}`);
         });
