@@ -4,9 +4,9 @@ dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 4000
-const connectServer = async() => {
+function connectServer(){
     try{
-        await app.listen(port, () => [
+        app.listen(port, () => [
             console.log(`Application started on PORT ${port}`)
         ])
     } catch (error){
