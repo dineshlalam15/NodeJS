@@ -1,18 +1,28 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import app from './app.js'
 
-async function connectMongoDB(uri) {
+const connectMongoDB = async (uri) => {
     if (!uri) {
-        console.log('URI is not defined in the environment variables');
+        console.error('Invalid Connection String');
         process.exit(1);
     }
     try {
-        await mongoose.connect(uri, {
-            serverSelectionTimeoutMS: 5000
-        });
-        console.log('Connected to MongoDB Atlas');
+        const connect = await mongoose.connect(uri);
+        console.log(`MongoDB connected at ${connect.connection.host}`);
     } catch (err) {
-        console.error('Error connecting to MongoDB Atlas', err);
+        console.error('Connection Failed', err);
         process.exit(1);
     }
-}
-module.exports = connectMongoDB;
+};
+
+const connectPort = (port) => {
+    if(!port){
+        console.error(`Invalid Port`);
+        process.exit(1)
+    }
+    app.listen(port, () => {
+        console.log(`Running on PORT ${port}`);
+    });
+};
+
+export { connectMongoDB, connectPort };

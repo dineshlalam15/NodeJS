@@ -1,22 +1,17 @@
-const express = require('express');
-const connectMongoDB = require('./connection.js');
-require('dotenv').config();
+import dotenv from 'dotenv'
+dotenv.config();
+import {connectMongoDB, connectPort} from './connection.js';
+import app from './app.js'
+import router from './methods.js';
 
-const router = require('./routes/user');
-const port = 8000;
-const app = express();
+app.use('/users', router)
 
-app.use(express.json());
-app.use('/users', router);
+const uri = process.env.MONGODB_URI;
+const port = process.env.PORT || 8000;
 
-const uri = process.env.ConnectionURI;
-connectMongoDB(uri)
-    .then(() => {
-        app.listen(port, () => {
-            console.log(`Server started at PORT ${port}`);
-        });
-    })
-    .catch(err => {
-        console.error('Failed to connect to MongoDB', err);
-        process.exit(1);
-    });
+connectMongoDB(uri).then(() => {
+    connectPort(port)
+}).catch(error => {
+    console.error(`Connection Error | ${error}`);
+    process.exit(1)
+})

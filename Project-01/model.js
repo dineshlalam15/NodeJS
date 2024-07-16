@@ -1,34 +1,36 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    id: {
+    ID: {
         type: Number,
         required: true,
         unique: true
     },
-    FirstName: {
-        type: String,
-        required: true,
-    },
-    LastName: {
+    Name: {
         type: String,
         required: true
     },
-    gender: {
+    Gender: {
         type: String,
         required: true
     },
-    email: {
+    Country: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
-    Job: {
+    Company: {
+        type: String,
+        required: true
+    },
+    Credit_Card: {
+        type: String,
+        required: true
+    },
+    Bank_Balance: {
         type: String,
         required: true
     }
-});
+})
+const User = mongoose.model("User", userSchema, 'User_Details')
 
-const dataModel = mongoose.model('dataModel', userSchema, 'Data');
-
-module.exports = dataModel;
+export default User
