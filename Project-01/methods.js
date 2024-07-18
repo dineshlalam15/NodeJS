@@ -91,4 +91,15 @@ router.route('/:id')
     }
 });
 
+router.route('/creditcard/:cc').get( async (req, res) => {
+    const findCC = req.params.cc
+    try{
+        const userDetails = await User.find({ Credit_Card: findCC})
+        return res.json(userDetails)
+    } catch(err){
+        console.error(`Error fetching the details of users having ${findCC} credit card.`, err);
+        res.status(500).json({ Error: 'Error fetching the user details' });
+    }
+})
+
 export default router
