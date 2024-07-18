@@ -1,9 +1,10 @@
 import express from 'express'
 import dotenv from 'dotenv'
 dotenv.config()
+import app from './app.js'
 
-const app = express()
 const port = process.env.PORT || 8000
+
 function connectServer(){
     try{
         app.listen(port, () => {
