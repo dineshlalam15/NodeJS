@@ -9,15 +9,15 @@ const registerUser = asyncHandler( async (req, res) => {
     console.log(`${fullName}, ${email}, ${userName}, ${password}`);
     const details = [fullName, email, userName, password];
     details.forEach(detail => {
-      if (!isEmpty(detail)) {
+      if (detail === "") {
         throw new APIError(400, `${detail} is required`);
       }
     });
     if(!email.includes('@')){
         throw new APIError(400, `Invalid Email Id`)
     }
-    const existedUserName = User.findOne({userName: userName})
-    const existedEmail = User.findOne({email: email})
+    const existedUserName = await User.findOne({userName: userName})
+    const existedEmail = await User.findOne({email: email})
     if(existedUserName){
         throw new APIError(409, `username unavailable`)
     }
@@ -30,7 +30,7 @@ const registerUser = asyncHandler( async (req, res) => {
     if(!avatarLocalPath){
         throw new APIError(400, `Avatar file is required`)
     }
-
+    
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
     if(!avatar){
@@ -38,22 +38,21 @@ const registerUser = asyncHandler( async (req, res) => {
     }
 
     const newUser = await User.create({
+        userName: userName.toLowerCase(),
         fullName: fullName,
+        email: email,
+        password: password,
         avatar: avatar.url,
         coverImage: coverImage ? coverImage.url : "",
-        email: email,
-        userName: userName.toLowerCase() 
     })
-    const createdUser = await User.findById(newUser._id).select("-password -refreshToken")
+    const createdUser = await User.findById(newUser._id).select(
+        "-password -refreshToken"
+    )
     if(!createdUser){
         throw new APIError(500, `Something went wrong while registering the user`)
     }
 
     return res.status(201).json(new APIResponse(200, createdUser, "User Registered Succesfully"))
 })
-
-function isEmpty(input){
-    return input === ""
-}
 
 export {registerUser}

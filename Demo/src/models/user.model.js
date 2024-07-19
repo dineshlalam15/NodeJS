@@ -3,11 +3,6 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 const userSchema = new Schema({
-    id:{
-        type: String,
-        required: true,
-        unique: true
-    },
     userName: {
         type: String,
         required: true,
@@ -46,7 +41,6 @@ const userSchema = new Schema({
     },
     refreshToken: {
         type: String,
-        required: true
     }
 }, {timestamps: true})
 
