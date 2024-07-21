@@ -1,0 +1,20 @@
+Validation Criterias:
+1. userName, fullName, email, password shouldn't be empty. 
+2. Length of username shouldn't be empty and in the same way should be less than 30.
+3. userName criteria is taken in the same way instagram allows. 
+
+Validation Criteria for email: 
+1. The email address can't start with characters that are whitespace or the @ symbol.
+2. It contains exactly one @ symbol.
+3. After the @ symbol, there shouldn't be any whitespaces or the @ symbol.
+4. It contains exactly one dot (.) after the characters following the @ symbol.
+5. After the dot, there shouldn't be any whitespaces or the @ symbol.
+
+Validation Criteria for password:
+password.length >= 8, password.length <= 64
+Maximum Length: Optionally, you can set a maximum length to ensure passwords are manageable.
+Uppercase Letter: Require at least one uppercase letter to increase complexity.
+Lowercase Letter: Require at least one lowercase letter to ensure a mix of cases.
+Digit: Require at least one digit to include numerical characters.
+Special Character: Require at least one special character (e.g., !@#$%^&*()) to add complexity.
+No Spaces: Optionally, disallow spaces to avoid leading/trailing whitespace issues.
