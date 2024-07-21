@@ -1,4 +1,4 @@
-import connectDB from './db/connection.js';
+import connectDB from './db/connection.db.js';
 import connectServer from './connection.js';
 
 connectDB().then(() => {
