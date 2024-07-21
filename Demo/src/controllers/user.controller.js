@@ -15,7 +15,8 @@ const generateRefreshAndAccessTokens = async(userId) => {
 
 const registerUser = asyncHandler( async (req, res) => {
     const {fullName, email, userName, password} = req.body
-    console.log(`${fullName}, ${email}, ${userName}, ${password}`);
+    console.log(`${fullName}, ${email}, ${userName}, ${password}`); // log statement
+    
     const details = [fullName, email, userName, password];
     details.forEach(element => {
         if(isEmpty(element)){
@@ -31,6 +32,7 @@ const registerUser = asyncHandler( async (req, res) => {
     if(!validatePassword(password)){
         throw new APIError(400, `Password seem's not safe. Try it again`)
     }
+
     const existedUserName = await User.findOne({userName: userName})
     const existedEmail = await User.findOne({email: email})
     if(existedUserName){
@@ -39,6 +41,7 @@ const registerUser = asyncHandler( async (req, res) => {
     if(existedEmail){
         throw new APIError(409, `User with this email already exist`)
     }
+
     const avatarLocalPath = req.files?.avatar[0]?.path
     let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
@@ -52,6 +55,7 @@ const registerUser = asyncHandler( async (req, res) => {
     if(!avatar){
         throw new APIError(400, `Avatar is required`)
     }
+
     const newUser = await User.create({
         userName: userName.toLowerCase(),
         fullName: fullName,
@@ -66,6 +70,7 @@ const registerUser = asyncHandler( async (req, res) => {
     if(!createdUser){
         throw new APIError(500, `Something went wrong while registering the user`)
     }
+
     return res.status(201).json(new APIResponse(200, createdUser, "User Registered Succesfully"))
 })
 
@@ -74,24 +79,29 @@ const loginUser = asyncHandler( async (req, res)  => {
     if(!userName || !email){
         throw new APIError(400, `Please enter username or email`)
     }
+
     const findUser = await User.findOne( { $or: [ { userName: userName }, { email : email } ] } )
     if(!findUser){
         throw new APIError(404, `Account with this email or user name doesn't exist`)
     }
+
     const checkPassword = await findUser.isPasswordCorrect(password)
     if(!checkPassword){
         throw new APIError(401, `Incorrect Password`)
     }
+
     const {refreshToken, accessToken} = await generateRefreshAndAccessTokens(findUser._id)
     const findLoggedInUser = await User.findById(findUser._id).select("-password, -refreshToken")
+
     const options = {
         httpOnly: true,
         secure: true
     }
+
     return res
     .status(200)
-    .cookie("Refresh Token", refreshToken, options)
-    .cookie("Access Token", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, options)
     .json(new APIResponse(
         200, 
         {
@@ -100,4 +110,24 @@ const loginUser = asyncHandler( async (req, res)  => {
         "user logged in successfully" )
     )
 })
-export {registerUser}
+
+const logoutUser = asyncHandler(async(req, res) => {
+    await User.findByIdAndUpdate(req.user._id, {
+        $set: {
+            refreshToken: undefined
+        }
+    }, {new: true})
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new APIResponse(200, {}, "User logged out"))
+})
+
+export {registerUser, loginUser, logoutUser}
