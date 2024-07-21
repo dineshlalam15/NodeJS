@@ -1,15 +1,16 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { APIError } from "../utils/APIError.js";
 import { APIResponse } from "../utils/APIResponse.js";
-import User from '../models/user.model.js'
+import {User, generateRefreshToken, generateAccessToken} from '../models/user.model.js'
 import {uploadOnCloudinary} from '../utils/cloudinary.js'
 import { isEmpty, validateEmail, validatePassword, validateUsername } from "../validation.js";
 
 const generateRefreshAndAccessTokens = async(userId) => {
     const findUser = await User.findById(userId)
-    const refreshToken = await findUser.generateRefreshToken()
-    const accessToken = await findUser.generateAccessToken()
+    const refreshToken = generateRefreshToken(findUser)
+    const accessToken = generateAccessToken(findUser)
     findUser.refreshToken = refreshToken
+    await findUser.save({ validateBeforeSave: false })
     return {refreshToken, accessToken}
 }
 
@@ -76,21 +77,26 @@ const registerUser = asyncHandler( async (req, res) => {
 
 const loginUser = asyncHandler( async (req, res)  => {
     const {userName, email, password} = req.body
-    if(!userName || !email){
-        throw new APIError(400, `Please enter username or email`)
+    console.log(`${userName}, ${email}, ${password}`)
+    if(!userName && !email){
+        throw new APIError(400, `Please enter a valid email or username`)
     }
 
-    const findUser = await User.findOne( { $or: [ { userName: userName }, { email : email } ] } )
+    const findUser = await User.findOne( { $or: [ { userName }, { email } ] } )
+    console.log(findUser);
     if(!findUser){
-        throw new APIError(404, `Account with this email or user name doesn't exist`)
+        throw new APIError(404, `user with this email or username doesn't exist`)
     }
 
     const checkPassword = await findUser.isPasswordCorrect(password)
+    console.log(checkPassword);
     if(!checkPassword){
         throw new APIError(401, `Incorrect Password`)
     }
 
     const {refreshToken, accessToken} = await generateRefreshAndAccessTokens(findUser._id)
+    console.log(refreshToken);
+    console.log(accessToken);
     const findLoggedInUser = await User.findById(findUser._id).select("-password, -refreshToken")
 
     const options = {

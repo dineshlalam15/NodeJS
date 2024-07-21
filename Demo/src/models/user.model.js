@@ -1,6 +1,8 @@
 import {Schema, model} from 'mongoose'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import dotenv from 'dotenv'
+dotenv.config();
 
 const userSchema = new Schema({
     userName: {
@@ -56,30 +58,29 @@ userSchema.methods.isPasswordCorrect = async function (password){
     return await bcrypt.compare(password, this.password)
 }
 
-userSchema.methods.generateAccessToken = function (){
-    return jwt.sign({
-        _id: this._id,
-        email: this.email,
-        userName: this.userName,
-        fullName: this.fullName
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRY
-    })
-    
-}
-
-userSchema.methods.generateRefreshToken = function(){
-    return jwt.sign({
-        _id: this._id
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    {
+function generateRefreshToken(user){
+    const payload = {
+        _id: user._id
+    }
+    const secretKey = process.env.REFRESH_TOKEN_SECRET
+    const options = {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-    })
+    }
+    const jwtToken = jwt.sign(payload, secretKey, options)
+    return jwtToken
 }
 
+function generateAccessToken(user){
+    const payload = {
+        _id: user._id
+    }
+    const secretKey = process.env.ACCESS_TOKEN_SECRET
+    const options = {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+    }
+    const jwtToken = jwt.sign(payload, secretKey, options)
+    return jwtToken
+}
 const User = model('User', userSchema)
 
-export default User
+export {User, generateRefreshToken, generateAccessToken}

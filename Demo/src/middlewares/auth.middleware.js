@@ -1,9 +1,9 @@
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import dotenv from 'dotenv'
 dotenv.config()
-import User from "../models/user.model";
+import {User} from "../models/user.model.js";
 import jwt from 'jsonwebtoken'
-import { APIError } from "../utils/APIError";
+import { APIError } from "../utils/APIError.js";
 
 const verifyJWT = asyncHandler ( async (req, _, next) => {
     try {
