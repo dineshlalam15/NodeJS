@@ -77,26 +77,21 @@ const registerUser = asyncHandler( async (req, res) => {
 
 const loginUser = asyncHandler( async (req, res)  => {
     const {userName, email, password} = req.body
-    console.log(`${userName}, ${email}, ${password}`)
     if(!userName && !email){
         throw new APIError(400, `Please enter a valid email or username`)
     }
 
     const findUser = await User.findOne( { $or: [ { userName }, { email } ] } )
-    console.log(findUser);
     if(!findUser){
         throw new APIError(404, `user with this email or username doesn't exist`)
     }
 
     const checkPassword = await findUser.isPasswordCorrect(password)
-    console.log(checkPassword);
     if(!checkPassword){
         throw new APIError(401, `Incorrect Password`)
     }
 
     const {refreshToken, accessToken} = await generateRefreshAndAccessTokens(findUser._id)
-    console.log(refreshToken);
-    console.log(accessToken);
     const findLoggedInUser = await User.findById(findUser._id).select("-password, -refreshToken")
 
     const options = {
