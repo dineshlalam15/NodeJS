@@ -9,6 +9,11 @@ const storage = multer.diskStorage({
     }
 })
 
-export const upload = multer({ 
-    storage: storage 
-})
+export const upload = multer({ storage: storage })
+
+/*
+Reference: https://www.npmjs.com/package/multer
+Two functions are present above: (i) destination, (ii) filename
+destination is used to determine within which folder the uploaded files should be stored.
+filename is used to determine what the file should be named inside the folder.
+*/
