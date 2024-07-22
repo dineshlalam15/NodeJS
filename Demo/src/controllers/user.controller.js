@@ -38,10 +38,10 @@ const registerUser = asyncHandler( async (req, res) => {
     const existedUserName = await User.findOne({userName: userName})
     const existedEmail = await User.findOne({email: email})
     if(existedUserName){
-        throw new APIError(409, `username unavailable`)
+        throw new APIError(400, `username unavailable`)
     }
     if(existedEmail){
-        throw new APIError(409, `User with this email already exist`)
+        throw new APIError(400, `User with this email already exist`)
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path
@@ -182,4 +182,84 @@ const changeCurrentPassword = asyncHandler( async (req, res) => {
     return res.status(200)
     .json(new APIResponse(200, {}, `Password is changed`))
 })
-export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword}
+
+const getCurrentUser = asyncHandler( async(req, res) => {
+    return res.status(200).json(new APIResponse(200, req.user, "User details fetched successfully"))
+})
+
+const updateUserDetails = asyncHandler( async (req, res) => {
+    const {userName, fullName, email} = req.body
+    console.log(`${userName}, ${fullName}, ${email}`);
+    try{
+        const findUser = await User.findById(req.user._id)
+        if(userName){
+            if(isEmpty(userName)){
+                throw new APIError(400, `userName can't be empty`)
+            } 
+            const existedUserName = await User.findOne({userName: userName})
+            if(existedUserName){
+                throw new APIError(400, `userName unavailable`)
+            }
+            findUser.userName = userName
+        }
+
+        if(email){
+            if(isEmpty(email)){
+                throw new APIError(400, `email is required`)
+            }
+            const existedEmail = await User.findOne({email: email})
+            if(existedEmail){
+                throw new APIError(400, `User with this email already exist`)
+            }
+            findUser.email = email
+        } 
+
+        if(fullName){
+            if(isEmpty(fullName)){
+                throw new APIError(400, `fullName can't be empty`)
+            } 
+            findUser.fullName = fullName
+        } 
+
+        let avatarLocalPath
+        let coverImageLocalPath
+        if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
+            avatarLocalPath = req.files.avatar[0].path
+        }
+        if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+            coverImageLocalPath = req.files.coverImage[0].path
+        }
+
+        let avatar
+        let coverImage
+        if(avatarLocalPath){
+            avatar = await uploadOnCloudinary(avatarLocalPath)
+        }
+        if(coverImageLocalPath){
+            coverImage = await uploadOnCloudinary(coverImageLocalPath)
+        }
+
+        findUser.avatar = avatar ? avatar.url : findUser.avatar
+        findUser.coverImage = coverImage ? coverImage.url : findUser.coverImage
+        await findUser.save({ validateBeforeSave: false })
+        return res.status(200).json(
+            new APIResponse(
+                200, 
+                findUser,
+                "User details updated successfully"
+            )
+        )
+    } catch(error){
+        throw new APIError( 500, `Cannot update details right now. Please try later`, error )
+    }
+})
+
+export {
+    registerUser, 
+    loginUser, 
+    logoutUser, 
+    refreshAccessToken, 
+    changeCurrentPassword, 
+    getCurrentUser, 
+    updateUserDetails
+}
