@@ -11,37 +11,35 @@ const generateRefreshAndAccessTokens = async(userId) => {
     const refreshToken = generateRefreshToken(findUser)
     const accessToken = generateAccessToken(findUser)
     findUser.refreshToken = refreshToken
-    await findUser.save({ validateBeforeSave: false })
+    await findUser.save({validateBeforeSave: false})
     return {refreshToken, accessToken}
 }
 
-const registerUser = asyncHandler( async (req, res) => {
+const registerUser = asyncHandler(async(req, res) => {
     const {fullName, email, userName, password} = req.body
-    console.log(`${fullName}, ${email}, ${userName}, ${password}`); // log statement
-    
-    const details = [fullName, email, userName, password];
+    const details = [fullName, email, userName, password]
     details.forEach(element => {
         if(isEmpty(element)){
             throw new APIError(400, `${element} is required`)
         }
     })
     if(!validateEmail(email)){
-        throw new APIError(400, `Invalid Email Id`)
+        throw new APIError(400, `Invalid email`)
     }
     if(!validateUsername(userName)){
-        throw new APIError(400, `${userName} not available`)
+        throw new APIError(400, `userName ${userName} not available`)
     }
     if(!validatePassword(password)){
-        throw new APIError(400, `Password seem's not safe. Try it again`)
+        throw new APIError(400, `password doesn't satisfy the security requirements`)
     }
 
     const existedUserName = await User.findOne({userName: userName})
     const existedEmail = await User.findOne({email: email})
     if(existedUserName){
-        throw new APIError(400, `username unavailable`)
+        throw new APIError(400, `userName unavailable`)
     }
     if(existedEmail){
-        throw new APIError(400, `User with this email already exist`)
+        throw new APIError(400, `User with the email ${email} already exist`)
     }
 
     const avatarLocalPath = req.files?.avatar[0]?.path
@@ -50,12 +48,13 @@ const registerUser = asyncHandler( async (req, res) => {
         coverImageLocalPath = req.files.coverImage[0].path
     }
     if(!avatarLocalPath){
-        throw new APIError(400, `Avatar file is required`)
+        throw new APIError(400, `Please upload the avatar`)
     }
+
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
     if(!avatar){
-        throw new APIError(400, `Avatar is required`)
+        throw new APIError(400, `avatar is required`)
     }
 
     const newUser = await User.create({
@@ -64,11 +63,9 @@ const registerUser = asyncHandler( async (req, res) => {
         email: email,
         password: password,
         avatar: avatar.url,
-        coverImage: coverImage.url || "",
+        coverImage: coverImage ? coverImage.url : ""
     })
-    const createdUser = await User.findById(newUser._id).select(
-        "-password -refreshToken"
-    )
+    const createdUser = await User.findById(newUser._id).select("-password, -refreshToken")
     if(!createdUser){
         throw new APIError(500, `Something went wrong while registering the user`)
     }
@@ -76,20 +73,25 @@ const registerUser = asyncHandler( async (req, res) => {
     return res.status(201).json(new APIResponse(200, createdUser, "User Registered Succesfully"))
 })
 
-const loginUser = asyncHandler( async (req, res)  => {
+const loginUser = asyncHandler(async(req, res)  => {
     const {userName, email, password} = req.body
     if(!userName && !email){
-        throw new APIError(400, `Please enter a valid email or username`)
+        throw new APIError(400, `Please enter a valid email or userName`)
     }
 
-    const findUser = await User.findOne( { $or: [ { userName }, { email } ] } )
+    const findUser = await User.findOne({
+        $or: [
+            {userName}, 
+            {email}
+        ]
+    })
     if(!findUser){
-        throw new APIError(404, `user with this email or username doesn't exist`)
+        throw new APIError(404, `User with this email or userName doesn't exist`)
     }
 
     const checkPassword = await findUser.isPasswordCorrect(password)
     if(!checkPassword){
-        throw new APIError(401, `Incorrect Password`)
+        throw new APIError(401, `Incorrect password`)
     }
 
     const {refreshToken, accessToken} = await generateRefreshAndAccessTokens(findUser._id)
@@ -189,7 +191,6 @@ const getCurrentUser = asyncHandler( async(req, res) => {
 
 const updateUserDetails = asyncHandler( async (req, res) => {
     const {userName, fullName, email} = req.body
-    console.log(`${userName}, ${fullName}, ${email}`);
     try{
         const findUser = await User.findById(req.user._id)
         if(userName){
@@ -212,14 +213,14 @@ const updateUserDetails = asyncHandler( async (req, res) => {
                 throw new APIError(400, `User with this email already exist`)
             }
             findUser.email = email
-        } 
+        }
 
         if(fullName){
             if(isEmpty(fullName)){
                 throw new APIError(400, `fullName can't be empty`)
             } 
             findUser.fullName = fullName
-        } 
+        }
 
         let avatarLocalPath
         let coverImageLocalPath
@@ -253,6 +254,7 @@ const updateUserDetails = asyncHandler( async (req, res) => {
         throw new APIError( 500, `Cannot update details right now. Please try later`, error )
     }
 })
+
 
 export {
     registerUser, 
