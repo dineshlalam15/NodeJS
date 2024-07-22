@@ -244,8 +244,9 @@ This repository contains the code for a user authentication and management syste
     npm start
     ```
 
-## License
+## Message
+Feel free to raise issues in the code so that it would improve the readability to others. 
 
-This project is licensed under the MIT License.
+## Thank You
 
 ---
